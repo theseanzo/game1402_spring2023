@@ -16,7 +16,8 @@ public class PlayerController : MonoBehaviour
     float jumpHeight = 15.0f;
     [SerializeField]
     float invert = 1.0f;
-
+    private float normalSpeed = 5;
+    private float runningSpeed = 10;
     //animation changes
     private const float ANIMATOR_SMOOTHING = 0.4f;
     private const float RAYCAST_LENGTH = 0.3f;
@@ -41,8 +42,15 @@ public class PlayerController : MonoBehaviour
         float vertical = Input.GetAxis("Vertical");
         Vector3 input = new Vector3(horizontal, 0, vertical).normalized * speed;
         animatorInput = Vector3.Lerp(animatorInput, input, ANIMATOR_SMOOTHING);
-        animator.SetFloat("HorizontalSpeed", animatorInput.x);
-        animator.SetFloat("VerticalSpeed", animatorInput.z);
+        if (!IsSprinting())
+        {
+            animator.SetFloat("HorizontalSpeed", animatorInput.x);
+            animator.SetFloat("VerticalSpeed", animatorInput.z);
+        }
+        else if (IsSprinting())
+        {
+            animator.SetTrigger("Sprinting");
+        }
         if (Input.GetButtonDown("Jump") && IsGrounded())
         {
             Debug.Log("Jump jump. Kriss kross will make you jump jump");
@@ -53,6 +61,10 @@ public class PlayerController : MonoBehaviour
         {
             input.y = GetComponent<Rigidbody>().velocity.y; //our jump velocity if we are not triggering a new jump is the current rigid body velocity based on its interaction with gravity
         }
+        if (Input.GetButtonDown("Fire2"))
+        {
+            animator.SetTrigger("Taunt");
+        }
         GetComponent<Rigidbody>().velocity = transform.TransformVector(input);
     }
     private bool IsGrounded() //we want to figure out if our character is on the ground or not
@@ -61,5 +73,20 @@ public class PlayerController : MonoBehaviour
         origin.y += RAYCAST_LENGTH * 0.5f;
         LayerMask mask = LayerMask.GetMask("Terrain");
         return Physics.Raycast(origin, Vector3.down, RAYCAST_LENGTH, mask);
+    }
+    private bool IsSprinting() //we want to figure out if our character is on the ground or not
+    {
+        if (Input.GetKey(KeyCode.LeftShift))
+        {
+            speed = runningSpeed;
+
+            return true;
+        }
+        else
+        {
+            speed = normalSpeed;
+
+            return false;
+        }
     }
 }
