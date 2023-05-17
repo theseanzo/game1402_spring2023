@@ -63,7 +63,7 @@ public class PlayerController : MonoBehaviour
         }
         if (Input.GetButtonDown("Fire2"))
         {
-            animator.SetTrigger("Taunt");
+            animator.SetTrigger("Taunting");
         }
         GetComponent<Rigidbody>().velocity = transform.TransformVector(input);
     }
