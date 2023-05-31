@@ -18,9 +18,9 @@ public class Unit : MonoBehaviour
     int damage = 10;
     private const float RAYCAST_LENGTH = 0.3f;
     protected Rigidbody rb;
-    void Start()
+    protected virtual void Start() //the reason this is virtual is because we need to override it (and virtual enforces that we can't have a Start function on the children without an override
     {
-        
+        animator = GetComponent<Animator>();
     }
     public int Team
     {

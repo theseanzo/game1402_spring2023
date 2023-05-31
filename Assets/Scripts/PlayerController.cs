@@ -23,11 +23,12 @@ public class PlayerController : Unit
     private Vector3 animatorInput;
 
     // Start is called before the first frame update
-    void Start()
+    protected override void Start()
     {
+        base.Start();
         playerCam = GetComponentInChildren<Camera>(); //This gets us the camera
         camContainer = playerCam.transform.parent; //this gets us the camera's parent's transform
-        animator = GetComponent<Animator>();
+
     }
 
     // Update is called once per frame
