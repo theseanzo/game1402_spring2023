@@ -19,12 +19,14 @@ public class PlayerController : Unit
 
     //animation changes
     private const float ANIMATOR_SMOOTHING = 0.4f;
+    private const float DISTANCE_LASER_IF_NO_HIT = 500.0f;
 
     private Vector3 animatorInput;
 
     // Start is called before the first frame update
     protected override void Start()
     {
+
         base.Start();
         playerCam = GetComponentInChildren<Camera>(); //This gets us the camera
         camContainer = playerCam.transform.parent; //this gets us the camera's parent's transform
@@ -53,6 +55,31 @@ public class PlayerController : Unit
         else
         {
             input.y = GetComponent<Rigidbody>().velocity.y; //our jump velocity if we are not triggering a new jump is the current rigid body velocity based on its interaction with gravity
+        }
+     
+        if (Input.GetButtonDown("Fire1"))
+        {
+            //before we can show lasers going out into the infinite distance, we need to see if we are going to hit something
+            LayerMask mask = ~LayerMask.GetMask("Outpost", "Teddy", "Terrain");
+
+
+            //we are having to do some ray casting
+            Ray ray = new Ray(GetEyesPosition(), playerCam.transform.forward); //aim our ray in the direction that we are looking
+            RaycastHit hit; //our hit is going to be used as an output of a Raycast
+            //so we need to use a layermask and a layermask is 
+            if(Physics.Raycast(ray, out hit, Mathf.Infinity, mask))
+            {
+                //if this is true, we hit something
+                ShootAt(hit);
+            }
+            else
+            {
+                //we now need to figure out a position we are firing
+                Vector3 targetPos = GetEyesPosition() +
+                    playerCam.transform.forward * DISTANCE_LASER_IF_NO_HIT; // go a distance forward from the camera direction
+                ShowLasers(targetPos);
+            }
+ 
         }
         if (Input.GetButtonDown("Fire2"))
         {

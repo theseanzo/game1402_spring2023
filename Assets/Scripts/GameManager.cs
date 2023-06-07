@@ -5,8 +5,7 @@ using UnityEngine;
 public class GameManager : MonoBehaviour
 {
     private static GameManager _instance;
-    [SerializeField] 
-    private Color[] teams;
+    public Color[] teams;
     internal Outpost[] outposts;
     public static GameManager Instance
     {
