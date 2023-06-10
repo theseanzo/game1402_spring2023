@@ -16,11 +16,14 @@ public class PlayerController : Unit
     float jumpHeight = 15.0f;
     [SerializeField]
     float invert = 1.0f;
+
     private float normalSpeed = 5;
     private float runningSpeed = 10;
+
+    bool isRunning;
     //animation changes
     private const float ANIMATOR_SMOOTHING = 0.4f;
-    
+
     private Vector3 animatorInput;
 
     // Start is called before the first frame update
@@ -42,14 +45,20 @@ public class PlayerController : Unit
         float vertical = Input.GetAxis("Vertical");
         Vector3 input = new Vector3(horizontal, 0, vertical).normalized * speed;
         animatorInput = Vector3.Lerp(animatorInput, input, ANIMATOR_SMOOTHING);
-        if (!IsSprinting())
+
+        animator.SetFloat("HorizontalSpeed",animatorInput.x);
+        animator.SetFloat("VerticalSpeed", animatorInput.z);
+
+        if (Input.GetKeyDown(KeyCode.LeftShift))
         {
-            animator.SetFloat("HorizontalSpeed", animatorInput.x);
-            animator.SetFloat("VerticalSpeed", animatorInput.z);
+            isRunning = true;
+            animator.SetBool("Running", isRunning);
+
         }
-        else if (IsSprinting())
+        if (Input.GetKeyUp(KeyCode.LeftShift))
         {
-            animator.SetTrigger("Sprinting");
+            isRunning = false;
+            animator.SetBool("Running", isRunning);
         }
         if (Input.GetButtonDown("Jump") && IsGrounded())
         {
@@ -66,21 +75,5 @@ public class PlayerController : Unit
             animator.SetTrigger("Taunting");
         }
         GetComponent<Rigidbody>().velocity = transform.TransformVector(input);
-    }
-    
-    private bool IsSprinting() //we want to figure out if our character is on the ground or not
-    {
-        if (Input.GetKey(KeyCode.LeftShift))
-        {
-            speed = runningSpeed;
-
-            return true;
-        }
-        else
-        {
-            speed = normalSpeed;
-
-            return false;
-        }
     }
 }
