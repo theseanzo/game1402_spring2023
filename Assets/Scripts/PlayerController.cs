@@ -6,23 +6,25 @@ public class PlayerController : Unit
 {
     private Camera playerCam; //this is the camera in our game
     private Transform camContainer; //this is the container which we are going to use for rotating the camera
+
+    private float speed = 5;
+
     [SerializeField]
-    float speed = 5;
+    float mouseXSensitivity = 1f;
     [SerializeField]
-    float mouseXSensitivity = 1;
-    [SerializeField]
-    float mouseYSensitivity = 1;
+    float mouseYSensitivity = 1f;
     [SerializeField]
     float jumpHeight = 15.0f;
     [SerializeField]
     float invert = 1.0f;
-
-    private float normalSpeed = 5;
-    private float runningSpeed = 10;
+    [SerializeField]
+     float walkingSpeed = 5;
+    [SerializeField]
+     float runningSpeed = 10;
 
     bool isRunning;
     //animation changes
-    private const float ANIMATOR_SMOOTHING = 0.4f;
+    private const float ANIMATOR_SMOOTHING = 0.5f;
 
     private Vector3 animatorInput;
 
@@ -37,10 +39,19 @@ public class PlayerController : Unit
     // Update is called once per frame
     void Update()
     {
+        float yAxis = Input.GetAxis("Mouse Y");
         //we are going to rotate our camera based on our mouse movement
-        camContainer.Rotate(invert * Input.GetAxis("Mouse Y") * mouseYSensitivity, 0, 0); //Input.GetAxis("Mouse X/Y") gives us the mouse movement up or down of our character
+        if (yAxis <  90 && yAxis > -90)
+        {
+            camContainer.Rotate(invert * yAxis * mouseYSensitivity, 0, 0); //Input.GetAxis("Mouse X/Y") gives us the mouse movement up or down of our character
+
+        }
+
+
         float rotationX = Input.GetAxis("Mouse X") * mouseXSensitivity;
+
         this.transform.Rotate(0, rotationX, 0);
+
         float horizontal = Input.GetAxis("Horizontal");
         float vertical = Input.GetAxis("Vertical");
         Vector3 input = new Vector3(horizontal, 0, vertical).normalized * speed;
@@ -49,20 +60,21 @@ public class PlayerController : Unit
         animator.SetFloat("HorizontalSpeed",animatorInput.x);
         animator.SetFloat("VerticalSpeed", animatorInput.z);
 
-        if (Input.GetKeyDown(KeyCode.LeftShift))
+        if (Input.GetKey(KeyCode.LeftShift))
         {
             isRunning = true;
+            speed = runningSpeed;
             animator.SetBool("Running", isRunning);
 
         }
-        if (Input.GetKeyUp(KeyCode.LeftShift))
+        else
         {
             isRunning = false;
+            speed = walkingSpeed;
             animator.SetBool("Running", isRunning);
         }
         if (Input.GetButtonDown("Jump") && IsGrounded())
         {
-            Debug.Log("Jump jump. Kriss kross will make you jump jump");
             input.y = jumpHeight;
             animator.SetTrigger("Jumping");
         }

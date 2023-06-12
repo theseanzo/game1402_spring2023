@@ -7,7 +7,7 @@ public class CameraCollision : MonoBehaviour
     public float minDistance = 1.0f;
     public float maxDistance = 4.0f;
 
-    public float smooth = 10.0f;
+    public float smooth = 5.0f;
     Vector3 dollyDir;
     public float distance;
 
@@ -16,6 +16,9 @@ public class CameraCollision : MonoBehaviour
     // Start is called before the first frame update
     void Awake()
     {
+        Cursor.lockState = CursorLockMode.Locked;
+        Cursor.visible = false;
+
         dollyDir = transform.localPosition.normalized;
         distance = transform.localPosition.magnitude;
     }
