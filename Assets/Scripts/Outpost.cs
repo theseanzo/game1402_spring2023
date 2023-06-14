@@ -28,7 +28,22 @@ public class Outpost : MonoBehaviour
     {
         if(team != -1) //recall -1 is the nothing value
         {
+            Color teamColor = GameManager.Instance.teams[team];//how would we get the current team's color?
+                                                               //we don't want to just immediately set the teamColor as soon as we arrive 
+                                                               //hint: our value between 0 and 1 is our currentValue
+            flag.material.color = Color.Lerp(Color.white, teamColor, currentValue);
             flag.transform.parent.localPosition = new Vector3(0, Mathf.Lerp(flagBottom, flagTop, currentValue), 0);
+            //once our current value is 1, we want to start collecting points
+            if(currentValue == 1)
+            {
+                timer += Time.deltaTime; //change in time in our scene
+                if (timer >= scoreInterval)
+                {
+                    timer = 0;
+                    ScoreManager.Instance.scores[team]++; //add 1 to the current team's score
+                }
+                //we want to have our points for a particular team updated after a scoreInterval
+            }
         }
     }
     private void OnTriggerStay(Collider other)
@@ -44,6 +59,7 @@ public class Outpost : MonoBehaviour
                 currentValue += valueIncrease;
                 if(currentValue >= 1)
                 {
+
                     currentValue = 1;
                 }
             }

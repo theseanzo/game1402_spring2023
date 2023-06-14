@@ -19,7 +19,7 @@ public class PlayerController : Unit
 
     //animation changes
     private const float ANIMATOR_SMOOTHING = 0.4f;
-    private const float DISTANCE_LASER_IF_NO_HIT = 500.0f;
+    
 
     private Vector3 animatorInput;
 

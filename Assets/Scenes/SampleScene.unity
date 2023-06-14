@@ -845,8 +845,10 @@ MonoBehaviour:
   fullHealth: 100
   team: 0
   health: 0
-  damage: 10
+  damage: 25
   laserPrefab: {fileID: 1134949319946392262, guid: faa0036ce33127147ba525c7f5ab9b92, type: 3}
+  viewAngle: 80
+  respawnTime: 5
   speed: 5
   mouseXSensitivity: 1
   mouseYSensitivity: 1
@@ -1058,7 +1060,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 619369805960567189, guid: fea87bcbcc5d13b46b9ed0f4ec618b5d, type: 3}
       propertyPath: m_Speed
-      value: 0
+      value: 3
       objectReference: {fileID: 0}
     - target: {fileID: 619369805960954648, guid: fea87bcbcc5d13b46b9ed0f4ec618b5d, type: 3}
       propertyPath: m_RootOrder
@@ -1074,7 +1076,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 619369805960954648, guid: fea87bcbcc5d13b46b9ed0f4ec618b5d, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 98
+      value: 107.61
       objectReference: {fileID: 0}
     - target: {fileID: 619369805960954648, guid: fea87bcbcc5d13b46b9ed0f4ec618b5d, type: 3}
       propertyPath: m_LocalRotation.w

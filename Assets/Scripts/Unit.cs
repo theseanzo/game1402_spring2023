@@ -19,15 +19,23 @@ public class Unit : MonoBehaviour
     private const float RAYCAST_LENGTH = 0.3f;
     protected Rigidbody rb;
     private Color myColor;
+    protected const float DISTANCE_LASER_IF_NO_HIT = 500.0f;
     [SerializeField]
     Laser laserPrefab;
     private Eye[] eyes = new Eye[2]; //we need to keep track of the eyes of our Unit
+    public float viewAngle = 80; //the angle with which we can see things
+
+    internal bool isAlive = true; //internal means public to that project, and private to everyone else
+    Vector3 startPos;
+    public float respawnTime = 5.0f;
     protected virtual void Start() //the reason this is virtual is because we need to override it (and virtual enforces that we can't have a Start function on the children without an override
     {
         animator = GetComponent<Animator>();
         eyes = GetComponentsInChildren<Eye>();
         myColor = GameManager.Instance.teams[team];//get the color for our team
         transform.Find("Teddy_Body").GetComponent<SkinnedMeshRenderer>().material.color = myColor; //change the bear color according to that team
+        startPos = this.transform.position;
+        Respawn();
     }
     public int Team
     {
@@ -42,8 +50,29 @@ public class Unit : MonoBehaviour
         health -= attacker.damage; //take some damage from the attacker
         if(health <= 0)
         {
+            Die();
             //we will do death code later
         }
+    }
+    protected bool CanSee(Transform target, Vector3 targetPosition)
+    {
+        Vector3 startPos = GetEyesPosition();//where we do get the starting position of our vision?
+        Vector3 dir = targetPosition - startPos;
+        //We now need to change if our angle is greater than the viewing angle, and, if so, return false
+        if (Vector3.Angle(transform.forward, dir) > viewAngle)
+            return false;
+
+        Ray ray = new Ray(startPos, dir);
+        LayerMask mask = ~LayerMask.GetMask("Outpost");//make sure that we don't care about our Outposts when looking for things
+        RaycastHit hit;
+        if(Physics.Raycast(ray, out hit, Mathf.Infinity, mask))
+        {
+            if(hit.transform != target)
+            {
+                return false;
+            }
+        }
+        return true;
     }
     protected Vector3 GetEyesPosition()
     {
@@ -85,5 +114,25 @@ public class Unit : MonoBehaviour
         origin.y += RAYCAST_LENGTH * 0.5f;
         LayerMask mask = LayerMask.GetMask("Terrain");
         return Physics.Raycast(origin, Vector3.down, RAYCAST_LENGTH, mask);
+    }
+    protected virtual void Die() //even for teddy bears, the Grim Reaper comes
+    {
+        if (!isAlive)
+            return; //this is a mistake clearly because we are already dead
+        gameObject.layer = LayerMask.NameToLayer("DeadTeddy");
+        isAlive = false;
+        Invoke("Respawn", respawnTime);
+    }
+    protected virtual void Respawn()
+    {
+        isAlive = true;
+        gameObject.layer = LayerMask.NameToLayer("LiveTeddy");
+        health = fullHealth;
+        this.transform.position = startPos;
+        //when we respawn, what do we need to do?
+        //1) Change the layer
+        //2) Health back to max
+        //3) Move back to spawn location
+        //4) Set them back to being alive
     }
 }

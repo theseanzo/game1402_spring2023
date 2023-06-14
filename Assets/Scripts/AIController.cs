@@ -14,6 +14,9 @@ public class AIController : Unit
         MovingToOutpost,
         Chasing
     }
+    public Vector3 aimOffset = new Vector3(0, 1.5f, 0);
+    public float shootInterval = 0.5f;
+    public float lookDistance = 10;//our AI can see 10 units away
     private State currentState; //this keeps track of the current state
     private NavMeshAgent agent; //this is our navmesh agent
     private Unit currentEnemy; //current enemy
@@ -52,9 +55,11 @@ public class AIController : Unit
     private IEnumerator OnIdle() //handles our idle state
     {
         //when idling, we should probably do some work and look for an outpost
-        while(currentOutpost == null)
+        currentOutpost = null;
+        while (currentOutpost == null)
         {
-            LookForOutposts(); //if we ever find an outpost, and the currentOutpost changes, we will leave this loop
+            if(isAlive)
+                LookForOutposts(); //if we ever find an outpost, and the currentOutpost changes, we will leave this loop
             yield return null; 
         }
         SetState(State.MovingToOutpost); //we found an outpost, we now need to move
@@ -66,6 +71,7 @@ public class AIController : Unit
         while(!(currentOutpost.team == Team  && currentOutpost.currentValue == 1))
         {
             //look for enemies
+            LookForEnemies();
             yield return null;
         }//we move towards an outpost as long as we are not the team possessing it
         currentOutpost = null;
@@ -73,13 +79,76 @@ public class AIController : Unit
     }
     private IEnumerator OnChasing()
     {
-        yield return null;
-    }
+        //we have to reset the path of our agent
+        agent.ResetPath();
+        float shootTimer = 0;
+        while (currentEnemy.isAlive)
+        {
+            shootTimer += Time.deltaTime; //increment our shoot timer each time
+            float distanceToEnemy = Vector3.Distance(currentEnemy.transform.position, this.transform.position);
+            //if we are too far away or we can't see our enemy, let's move towards them
+            //otherwise, if our shoot timer is up, shoot them
+            if(distanceToEnemy > lookDistance || !CanSee(currentEnemy.transform, currentEnemy.transform.position + aimOffset))
+            {
+                agent.SetDestination(currentEnemy.transform.position);
+            }
+            else if (shootTimer > shootInterval)
+            {
+                agent.ResetPath();
+                shootTimer = 0;
+                Vector3 dir = currentEnemy.transform.position - this.transform.position;
+                dir.Normalize();
 
+                LayerMask mask = ~LayerMask.GetMask("Outpost", "Terrain");
+                Ray ray = new Ray(GetEyesPosition(), dir); //aim our ray in the direction that we are looking
+                RaycastHit hit; //our hit is going to be used as an output of a Raycast
+                                //so we need to use a layermask and a layermask is 
+                if (Physics.Raycast(ray, out hit, Mathf.Infinity, mask))
+                {
+                    //if this is true, we hit something
+                    ShootAt(hit);
+                }
+                else
+                {
+                    Vector3 targetPos = GetEyesPosition() +
+                        dir * DISTANCE_LASER_IF_NO_HIT; // go a distance forward from the camera direction
+                    ShowLasers(targetPos);
+                }
+            }
+            yield return null;  
+        }
+        currentEnemy = null;
+        SetState(State.Idle);
+    }
+    private void LookForEnemies()
+    {
+        Collider[] surroundingColliders = Physics.OverlapSphere(this.transform.position, lookDistance);
+        foreach(Collider coll in surroundingColliders)
+        {
+            //how do we know if the element we are colliding with is an enemy?
+            //Not on our team.
+            Unit unit = coll.GetComponent<Unit>();
+            if(unit != null)
+            {
+                //we also want to check a couplemore things:
+                if(unit.Team != Team && CanSee(unit.transform, unit.transform.position + aimOffset) && unit.isAlive)
+                {
+                    currentEnemy = unit;
+                    SetState(State.Chasing);
+                    return; //remember: you can return anywhere in a void function and it immediately exits
+                }
+            }
+        }
+    }
     private void LookForOutposts()
     {
         int r = Random.Range(0, GameManager.Instance.outposts.Length);//find a random outpost
         currentOutpost = GameManager.Instance.outposts[r];
+    }
+    protected override void Respawn()
+    {
+        base.Respawn();
+        SetState(State.Idle);
     }
     // Update is called once per frame
     void Update()
