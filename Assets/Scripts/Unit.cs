@@ -120,7 +120,11 @@ public class Unit : MonoBehaviour
         if (!isAlive)
             return; //this is a mistake clearly because we are already dead
         gameObject.layer = LayerMask.NameToLayer("DeadTeddy");
+
         isAlive = false;
+        Debug.Log("Die");
+
+        animator.SetBool("Dead", true);
         Invoke("Respawn", respawnTime);
     }
     protected virtual void Respawn()
@@ -129,6 +133,7 @@ public class Unit : MonoBehaviour
         gameObject.layer = LayerMask.NameToLayer("LiveTeddy");
         health = fullHealth;
         this.transform.position = startPos;
+        animator.SetBool("Dead", false);
         //when we respawn, what do we need to do?
         //1) Change the layer
         //2) Health back to max

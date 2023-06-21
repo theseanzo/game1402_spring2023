@@ -140,6 +140,7 @@ public class AIController : Unit
             }
         }
     }
+
     private void LookForOutposts()
     {
         int r = Random.Range(0, GameManager.Instance.outposts.Length);//find a random outpost
@@ -149,6 +150,15 @@ public class AIController : Unit
     {
         base.Respawn();
         SetState(State.Idle);
+    }
+    protected override void Die()
+    {
+        StopAllCoroutines();
+        agent.ResetPath();
+        base.Die();
+        currentEnemy = null;
+        
+        
     }
     // Update is called once per frame
     void Update()
